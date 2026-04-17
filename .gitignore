@@ -1,0 +1,10 @@
+node_modules
+.output
+.nuxt
+dist
+.turbo
+.env
+.env.local
+.DS_Store
+*.log
+.coverage

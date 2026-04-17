@@ -2,7 +2,7 @@
 
 ## Visión General
 
-Este documento describe la arquitectura técnica para migrar el Merchants Dashboard de Wompi desde un monolito SPA legacy (Nuxt 1.0.0, Vue 2.7, Webpack 3, Node 12) hacia una arquitectura de micro-frontends con Nuxt 3, Vue 3, TypeScript, Module Federation y Turborepo.
+Este documento describe la arquitectura técnica para migrar el Merchants Dashboard de Wompi desde un monolito SPA legacy (Nuxt 1.0.0, Vue 2.7, Webpack 3, Node 12) hacia una arquitectura de micro-frontends con Nuxt 4, Vue 3, TypeScript, Module Federation y Turborepo.
 
 La migración se ejecuta en un hackathon de 48 horas con 4 personas. El diseño prioriza pragmatismo: reutilizar lógica existente, adaptar en vez de reescribir, y entregar un MVP funcional demostrable.
 
@@ -10,11 +10,11 @@ La migración se ejecuta en un hackathon de 48 horas con 4 personas. El diseño 
 
 | Decisión | Elección | Justificación |
 |----------|----------|---------------|
-| Framework | Nuxt 3 (Vue 3) | Mismo ecosistema que el legacy, curva de aprendizaje mínima |
+| Framework | Nuxt 4 (Vue 3) | Mismo ecosistema que el legacy, estructura `app/` mejorada, mejor TypeScript |
 | Monorepo | Turborepo + pnpm workspaces | Build caching, paralelismo, resolución de deps interna |
-| MFE Runtime | `@module-federation/vite` | Integración nativa con Vite (bundler de Nuxt 3) |
+| MFE Runtime | `@module-federation/vite` | Integración nativa con Vite (bundler de Nuxt 4) |
 | Estado | Pinia (Composition API) | Migración casi 1:1 desde Vuex, tipado nativo |
-| HTTP Client | `ofetch` (nativo Nuxt 3) | Reemplaza axios 0.x, interceptors via hooks, 0 CVEs |
+| HTTP Client | `ofetch` (nativo Nuxt 4) | Reemplaza axios 0.x, interceptors via hooks, 0 CVEs |
 | UI | Nuxt UI v3 + Tailwind CSS 4 | Reemplaza Element UI 2.x, componentes accesibles |
 | Auth | `amazon-cognito-identity-js` + composable | Misma librería, envuelta en composable tipado |
 | Comunicación MFE | Event Bus tipado (mitt) | Ligero, tipado, sin dependencias pesadas |
@@ -29,10 +29,10 @@ La migración se ejecuta en un hackathon de 48 horas con 4 personas. El diseño 
 graph TB
     subgraph Monorepo["Monorepo (Turborepo + pnpm)"]
         subgraph Apps["apps/"]
-            Shell["Shell (Host)<br/>Nuxt 3<br/>Layout + Auth + Nav + MF Host"]
-            MFE_TX["MFE Transactions<br/>Nuxt 3 Remote"]
-            MFE_PO["MFE Payouts<br/>Nuxt 3 Remote"]
-            MFE_ST["MFE Settings<br/>Nuxt 3 Remote"]
+            Shell["Shell (Host)<br/>Nuxt 4<br/>Layout + Auth + Nav + MF Host"]
+            MFE_TX["MFE Transactions<br/>Nuxt 4 Remote"]
+            MFE_PO["MFE Payouts<br/>Nuxt 4 Remote"]
+            MFE_ST["MFE Settings<br/>Nuxt 4 Remote"]
         end
         subgraph Packages["packages/"]
             PKG_AUTH["@wompi/auth<br/>Cognito composable"]
@@ -97,73 +97,84 @@ sequenceDiagram
 ```
 merchants-dashboard-mfe/
 ├── apps/
-│   ├── shell/                    # Host — Nuxt 3
-│   │   ├── app.vue
-│   │   ├── nuxt.config.ts
-│   │   ├── layouts/
-│   │   │   └── default.vue       # Sidebar + Header + Content
-│   │   ├── pages/
-│   │   │   ├── index.vue         # Redirect a /transactions
-│   │   │   ├── login.vue
-│   │   │   └── [...slug].vue     # Catch-all → carga MFE dinámico
-│   │   ├── middleware/
-│   │   │   └── auth.global.ts
-│   │   ├── composables/
-│   │   │   └── useMerchantContext.ts
-│   │   └── components/
-│   │       ├── AppSidebar.vue
-│   │       ├── AppHeader.vue
-│   │       └── MfeLoader.vue     # Wrapper Module Federation
+│   ├── shell/                    # Host — Nuxt 4
+│   │   ├── app/
+│   │   │   ├── app.vue
+│   │   │   ├── layouts/
+│   │   │   │   └── default.vue       # Sidebar + Header + Content
+│   │   │   ├── pages/
+│   │   │   │   ├── index.vue         # Redirect a /transactions
+│   │   │   │   ├── login.vue
+│   │   │   │   └── [...slug].vue     # Catch-all → carga MFE dinámico
+│   │   │   ├── middleware/
+│   │   │   │   └── auth.global.ts
+│   │   │   ├── composables/
+│   │   │   │   └── useMerchantContext.ts
+│   │   │   └── components/
+│   │   │       ├── AppSidebar.vue
+│   │   │       ├── AppHeader.vue
+│   │   │       └── MfeLoader.vue     # Wrapper Module Federation
+│   │   ├── shared/                   # Nuxt 4: código compartido app/server
+│   │   │   └── types/
+│   │   └── nuxt.config.ts
 │   │
-│   ├── mfe-transactions/         # Remote — Nuxt 3
-│   │   ├── nuxt.config.ts
-│   │   ├── pages/
-│   │   │   ├── index.vue         # Lista transacciones
-│   │   │   ├── [id].vue          # Detalle transacción
-│   │   │   ├── disputes/
-│   │   │   │   ├── index.vue
-│   │   │   │   └── [id].vue
-│   │   │   └── payment-links/
-│   │   │       ├── index.vue
-│   │   │       ├── create.vue
-│   │   │       └── [id].vue
-│   │   └── stores/
-│   │       ├── transactions.ts
-│   │       ├── disputes.ts
-│   │       └── paymentLinks.ts
+│   ├── mfe-transactions/         # Remote — Nuxt 4
+│   │   ├── app/
+│   │   │   ├── app.vue
+│   │   │   ├── pages/
+│   │   │   │   ├── index.vue         # Lista transacciones
+│   │   │   │   ├── [id].vue          # Detalle transacción
+│   │   │   │   ├── disputes/
+│   │   │   │   │   ├── index.vue
+│   │   │   │   │   └── [id].vue
+│   │   │   │   └── payment-links/
+│   │   │   │       ├── index.vue
+│   │   │   │       ├── create.vue
+│   │   │   │       └── [id].vue
+│   │   │   ├── stores/
+│   │   │   │   ├── transactions.ts
+│   │   │   │   ├── disputes.ts
+│   │   │   │   └── paymentLinks.ts
+│   │   │   └── composables/
+│   │   └── nuxt.config.ts
 │   │
-│   ├── mfe-payouts/              # Remote — Nuxt 3
-│   │   ├── nuxt.config.ts
-│   │   ├── pages/
-│   │   │   ├── balances.vue
-│   │   │   ├── create-payment.vue
-│   │   │   ├── transactions.vue
-│   │   │   ├── approvals.vue
-│   │   │   ├── favorites.vue
-│   │   │   ├── limits.vue
-│   │   │   └── reports.vue
-│   │   └── stores/
-│   │       ├── balances.ts
-│   │       ├── payments.ts
-│   │       └── approvals.ts
+│   ├── mfe-payouts/              # Remote — Nuxt 4
+│   │   ├── app/
+│   │   │   ├── app.vue
+│   │   │   ├── pages/
+│   │   │   │   ├── balances.vue
+│   │   │   │   ├── create-payment.vue
+│   │   │   │   ├── transactions.vue
+│   │   │   │   ├── approvals.vue
+│   │   │   │   ├── favorites.vue
+│   │   │   │   ├── limits.vue
+│   │   │   │   └── reports.vue
+│   │   │   ├── stores/
+│   │   │   │   ├── balances.ts
+│   │   │   │   ├── payments.ts
+│   │   │   │   └── approvals.ts
+│   │   │   └── composables/
+│   │   └── nuxt.config.ts
 │   │
-│   └── mfe-settings/             # Remote — Nuxt 3
-│       ├── nuxt.config.ts
-│       ├── pages/
-│       │   ├── users/
-│       │   │   ├── index.vue
-│       │   │   ├── create.vue
-│       │   │   └── [id].vue
-│       │   ├── roles/
-│       │   │   ├── index.vue
-│       │   │   ├── create.vue
-│       │   │   └── [id].vue
-│       │   ├── keys.vue
-│       │   ├── my-account.vue
-│       │   └── developers.vue
-│       └── stores/
-│           ├── users.ts
-│           └── roles.ts
+│   └── mfe-settings/             # Remote — Nuxt 4
+│       ├── app/
+│       │   ├── app.vue
+│       │   ├── pages/
+│       │   │   ├── users/
+│       │   │   │   ├── index.vue
+│       │   │   │   ├── create.vue
+│       │   │   │   └── [id].vue
+│       │   │   ├── roles/
+│       │   │   │   ├── index.vue
+│       │   │   │   ├── create.vue
+│       │   │   │   └── [id].vue
+│       │   │   ├── keys.vue
+│       │   │   ├── my-account.vue
+│       │   │   └── developers.vue
+│       │   └── stores/
+│       │       ├── users.ts
+│       │       └── roles.ts
+│       └── nuxt.config.ts
 │
 ├── packages/
 │   ├── auth/                     # @wompi/auth
@@ -274,6 +285,8 @@ import { createModuleFederationConfig } from '@module-federation/vite'
 export default defineNuxtConfig({
   devtools: { enabled: true },
   ssr: false, // SPA mode — igual que el legacy
+
+  // Nuxt 4: estructura app/ habilitada por defecto
   modules: ['@nuxt/ui'],
 
   vite: {
@@ -326,7 +339,7 @@ export default defineNuxtConfig({
         name: 'mfe-transactions',
         filename: 'remoteEntry.js',
         exposes: {
-          './TransactionsApp': './app.vue',
+          './TransactionsApp': './app/app.vue',
         },
         shared: {
           vue: { singleton: true, requiredVersion: '^3.5.0' },
@@ -346,7 +359,7 @@ export default defineNuxtConfig({
 El Shell replica la estructura del layout legacy (`layoutSidebar.vue`) con tres zonas: sidebar, header y contenido.
 
 ```vue
-<!-- apps/shell/layouts/default.vue -->
+<!-- apps/shell/app/layouts/default.vue -->
 <template>
   <div class="flex h-screen bg-gray-50">
     <!-- Sidebar -->
@@ -393,7 +406,7 @@ function handleNavigation(path: string) {
 #### Auth Middleware Global
 
 ```typescript
-// apps/shell/middleware/auth.global.ts
+// apps/shell/app/middleware/auth.global.ts
 export default defineNuxtRouteMiddleware((to) => {
   const publicRoutes = ['/login', '/password-recovery', '/register', '/confirm-code']
 
@@ -411,7 +424,7 @@ export default defineNuxtRouteMiddleware((to) => {
 #### MFE Loader — Carga Dinámica de Remotes
 
 ```vue
-<!-- apps/shell/components/MfeLoader.vue -->
+<!-- apps/shell/app/components/MfeLoader.vue -->
 <template>
   <Suspense>
     <template #default>
@@ -460,7 +473,7 @@ onMounted(loadMfe)
 #### Catch-All Route para MFEs
 
 ```vue
-<!-- apps/shell/pages/[...slug].vue -->
+<!-- apps/shell/app/pages/[...slug].vue -->
 <template>
   <MfeLoader
     v-if="mfeConfig"
@@ -498,7 +511,7 @@ const mfeConfig = computed(() => {
 ### 6. Merchant Context Provider
 
 ```typescript
-// apps/shell/composables/useMerchantContext.ts
+// apps/shell/app/composables/useMerchantContext.ts
 import { useEventBus } from '@wompi/event-bus'
 import type { Merchant, ApiEnvironment } from '@wompi/types'
 
@@ -1100,18 +1113,19 @@ Cada MFE sigue la misma estructura interna:
 
 ```
 mfe-{domain}/
-├── app.vue              # Entry point expuesto via Module Federation
-├── nuxt.config.ts       # Config con MF remote
-├── pages/               # Rutas internas del MFE
-├── stores/              # Pinia stores del dominio
-├── composables/         # Lógica reutilizable del dominio
-└── components/          # Componentes específicos del dominio
+├── app/
+│   ├── app.vue              # Entry point expuesto via Module Federation
+│   ├── pages/               # Rutas internas del MFE
+│   ├── composables/         # Lógica reutilizable del dominio
+│   └── components/          # Componentes específicos del dominio
+├── stores/                  # Pinia stores del dominio (en shared/ o app/)
+└── nuxt.config.ts           # Config con MF remote
 ```
 
 #### MFE Transactions — API Integration
 
 ```typescript
-// apps/mfe-transactions/composables/useTransactionsApi.ts
+// apps/mfe-transactions/app/composables/useTransactionsApi.ts
 import { useApiClient } from '@wompi/api-client'
 import type { Transaction, TransactionFilters } from '@wompi/types'
 
@@ -1140,7 +1154,7 @@ export function useTransactionsApi() {
 #### MFE Payouts — API Integration
 
 ```typescript
-// apps/mfe-payouts/composables/usePayoutsApi.ts
+// apps/mfe-payouts/app/composables/usePayoutsApi.ts
 import { useApiClient } from '@wompi/api-client'
 import type { PayoutBalance, CreatePayoutRequest } from '@wompi/types'
 
@@ -1350,10 +1364,10 @@ La migración elimina las 60+ vulnerabilidades del stack legacy al reemplazar:
 
 | Dependencia Legacy (con CVEs) | Reemplazo (0 CVEs) |
 |-------------------------------|---------------------|
-| `nuxt@1.0.0` (Vue 2, Webpack 3) | `nuxt@3.x` (Vue 3, Vite 5) |
+| `nuxt@1.0.0` (Vue 2, Webpack 3) | `nuxt@4.x` (Vue 3, Vite 6) |
 | `vue@2.7.16` | `vue@3.5.x` |
-| `webpack@3.0.0` | `vite@6.x` (incluido en Nuxt 3) |
-| `axios@0.30.3` | `ofetch@1.x` (nativo Nuxt 3) |
+| `webpack@3.0.0` | `vite@6.x` (incluido en Nuxt 4) |
+| `axios@0.30.3` | `ofetch@1.x` (nativo Nuxt 4) |
 | `element-ui@2.3.4` | `@nuxt/ui@3.x` (Radix Vue + Tailwind) |
 | `node-sass@4.14.1` | `tailwindcss@4.x` (no requiere sass) |
 | `babel-core@6.26.3` + plugins | TypeScript nativo (esbuild via Vite) |

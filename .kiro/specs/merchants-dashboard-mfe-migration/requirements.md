@@ -2,17 +2,17 @@
 
 ## Introducción
 
-Migración del Merchants Dashboard de Wompi desde un monolito SPA legacy (Nuxt 1.0.0, Vue 2.7, Webpack 3, Node 12, sin TypeScript, 60+ vulnerabilidades ignoradas en Snyk) hacia una arquitectura de micro-frontends moderna con Nuxt 3, Vue 3, TypeScript, Module Federation y Turborepo. El objetivo es eliminar la deuda técnica acumulada, resolver todas las vulnerabilidades de seguridad, y habilitar el despliegue independiente por dominio funcional.
+Migración del Merchants Dashboard de Wompi desde un monolito SPA legacy (Nuxt 1.0.0, Vue 2.7, Webpack 3, Node 12, sin TypeScript, 60+ vulnerabilidades ignoradas en Snyk) hacia una arquitectura de micro-frontends moderna con Nuxt 4, Vue 3, TypeScript, Module Federation y Turborepo. El objetivo es eliminar la deuda técnica acumulada, resolver todas las vulnerabilidades de seguridad, y habilitar el despliegue independiente por dominio funcional.
 
 ## Glosario
 
-- **Shell**: Aplicación Nuxt 3 host que provee layout global (sidebar, header, content area), autenticación, navegación, selector de merchant y configuración de Module Federation como host.
-- **MFE**: Micro-Frontend — aplicación Nuxt 3 independiente que se registra como remote en Module Federation y se carga dinámicamente dentro del Shell.
+- **Shell**: Aplicación Nuxt 4 host que provee layout global (sidebar, header, content area), autenticación, navegación, selector de merchant y configuración de Module Federation como host. Usa la nueva estructura `app/` de Nuxt 4.
+- **MFE**: Micro-Frontend — aplicación Nuxt 4 independiente que se registra como remote en Module Federation y se carga dinámicamente dentro del Shell.
 - **MFE_Transactions**: Micro-frontend que encapsula el dominio de transacciones, disputas y payment links.
 - **MFE_Payouts**: Micro-frontend que encapsula el dominio de payouts (balances, pagos, aprobaciones, favoritos, límites, reportes).
 - **MFE_Settings**: Micro-frontend que encapsula el dominio de configuración (usuarios, roles, llaves API, mi cuenta, developers).
 - **Monorepo**: Repositorio único gestionado con Turborepo que contiene todas las apps (Shell, MFEs) y packages compartidos.
-- **Module_Federation**: Plugin de Vite (`@module-federation/vite`) que permite cargar módulos remotos en runtime, habilitando despliegue independiente de cada MFE.
+- **Module_Federation**: Plugin de Vite (`@module-federation/vite`) que permite cargar módulos remotos en runtime, habilitando despliegue independiente de cada MFE. Compatible con Nuxt 4 y su bundler Vite 6.
 - **Pinia**: Librería de manejo de estado para Vue 3 que reemplaza a Vuex, con API basada en Composition API.
 - **Cognito**: Servicio AWS de autenticación usado para login, logout, refresh de sesión y gestión de tokens.
 - **API_Client**: Package compartido que encapsula la comunicación HTTP con los backends de Wompi, incluyendo interceptors de autenticación y manejo de errores.
@@ -251,7 +251,7 @@ Migración del Merchants Dashboard de Wompi desde un monolito SPA legacy (Nuxt 1
 
 #### Criterios de Aceptación
 
-1. THE Monorepo SHALL usar versiones actuales y soportadas de todas las dependencias: Nuxt 3.x, Vue 3.x, TypeScript 5.x, Node 20 LTS, Vite 5.x+.
+1. THE Monorepo SHALL usar versiones actuales y soportadas de todas las dependencias: Nuxt 4.x, Vue 3.x, TypeScript 5.x, Node 20 LTS, Vite 6.x.
 2. THE Monorepo SHALL eliminar todas las dependencias legacy con vulnerabilidades conocidas: nuxt 1.x, vue 2.x, webpack 3.x, axios 0.x, element-ui 2.x, node-sass, babel 6.x.
 3. WHEN se ejecuta un escaneo de Snyk sobre el Monorepo, THE Monorepo SHALL reportar 0 vulnerabilidades de severidad crítica o alta.
 4. THE Monorepo SHALL no requerir un archivo `.snyk` con vulnerabilidades ignoradas.

@@ -2,7 +2,7 @@
 
 ## Visión General
 
-Plan de implementación para migrar el Merchants Dashboard de Wompi desde un monolito Nuxt 1 hacia una arquitectura de micro-frontends con Nuxt 3, TypeScript, Module Federation y Turborepo. Las tareas están ordenadas por prioridad para un hackathon de 48 horas con 4 personas. Se usa TypeScript en todo el código nuevo.
+Plan de implementación para migrar el Merchants Dashboard de Wompi desde un monolito Nuxt 1 hacia una arquitectura de micro-frontends con Nuxt 4, TypeScript, Module Federation y Turborepo. Las tareas están ordenadas por prioridad para un hackathon de 48 horas con 4 personas. Se usa TypeScript en todo el código nuevo. Nuxt 4 usa la nueva estructura `app/` donde todo el código de la aplicación vive dentro de `app/` (pages, components, composables, layouts, middleware).
 
 ## Tareas
 
@@ -87,8 +87,8 @@ Plan de implementación para migrar el Merchants Dashboard de Wompi desde un mon
     - _Requerimientos: 17.1, 17.2, 17.3_
 
 - [ ] 5. Implementar Shell App — Layout, Auth y Module Federation
-  - [ ] 5.1 Crear app Shell con Nuxt 3 y configuración Module Federation host
-    - Crear `apps/shell/` con `nuxt.config.ts` configurando: `ssr: false` (SPA mode), `@nuxt/ui` module, `@module-federation/vite` como host declarando remotes (mfe-transactions, mfe-payouts, mfe-settings) con URLs configurables por env vars, shared singletons (vue, pinia, vue-i18n, ofetch)
+  - [ ] 5.1 Crear app Shell con Nuxt 4 y configuración Module Federation host
+    - Crear `apps/shell/` con `nuxt.config.ts` configurando: `ssr: false` (SPA mode), `@nuxt/ui` module, `@module-federation/vite` como host declarando remotes (mfe-transactions, mfe-payouts, mfe-settings) con URLs configurables por env vars, shared singletons (vue, pinia, vue-i18n, ofetch). Nuxt 4 usa la estructura `app/` por defecto.
     - Crear `apps/shell/package.json` con dependencias de los packages compartidos (`@wompi/auth`, `@wompi/api-client`, `@wompi/ui`, `@wompi/i18n`, `@wompi/event-bus`, `@wompi/types`)
     - Crear `apps/shell/tsconfig.json` extendiendo `tsconfig.base.json`
     - _Requerimientos: 5.1, 5.3_
@@ -130,8 +130,8 @@ Plan de implementación para migrar el Merchants Dashboard de Wompi desde un mon
   - Asegurar que todos los tests pasan, preguntar al usuario si surgen dudas
 
 - [ ] 7. Implementar MFE Transactions
-  - [ ] 7.1 Crear app MFE Transactions con Nuxt 3 y Module Federation remote
-    - Crear `apps/mfe-transactions/` con `nuxt.config.ts` configurando: `ssr: false`, `@nuxt/ui`, `@module-federation/vite` como remote exponiendo `./TransactionsApp` desde `app.vue`, shared singletons
+  - [ ] 7.1 Crear app MFE Transactions con Nuxt 4 y Module Federation remote
+    - Crear `apps/mfe-transactions/` con `nuxt.config.ts` configurando: `ssr: false`, `@nuxt/ui`, `@module-federation/vite` como remote exponiendo `./TransactionsApp` desde `app/app.vue`, shared singletons
     - Crear `apps/mfe-transactions/package.json` con dependencias de packages compartidos
     - Crear `apps/mfe-transactions/app.vue` como entry point con suscripción a eventos del Shell (`merchant:changed`, `environment:changed`) y cleanup en `onUnmounted`
     - _Requerimientos: 5.1, 5.3, 5.5_
@@ -182,7 +182,7 @@ Plan de implementación para migrar el Merchants Dashboard de Wompi desde un mon
   - Asegurar que todos los tests pasan, preguntar al usuario si surgen dudas
 
 - [ ] 9. Implementar MFE Payouts
-  - [ ] 9.1 Crear app MFE Payouts con Nuxt 3 y Module Federation remote
+  - [ ] 9.1 Crear app MFE Payouts con Nuxt 4 y Module Federation remote
     - Crear `apps/mfe-payouts/` con `nuxt.config.ts` configurando Module Federation remote exponiendo `./PayoutsApp`
     - Crear `apps/mfe-payouts/package.json` y `apps/mfe-payouts/app.vue` con suscripción a eventos del Shell
     - _Requerimientos: 5.1, 5.3_
@@ -223,7 +223,7 @@ Plan de implementación para migrar el Merchants Dashboard de Wompi desde un mon
 
 
 - [ ] 11. Implementar MFE Settings
-  - [ ] 11.1 Crear app MFE Settings con Nuxt 3 y Module Federation remote
+  - [ ] 11.1 Crear app MFE Settings con Nuxt 4 y Module Federation remote
     - Crear `apps/mfe-settings/` con `nuxt.config.ts` configurando Module Federation remote exponiendo `./SettingsApp`
     - Crear `apps/mfe-settings/package.json` y `apps/mfe-settings/app.vue` con suscripción a eventos del Shell
     - _Requerimientos: 5.1, 5.3_
@@ -265,7 +265,7 @@ Plan de implementación para migrar el Merchants Dashboard de Wompi desde un mon
 - [ ] 13. Verificación de seguridad y polish final
   - [ ] 13.1 Verificar 0 vulnerabilidades en el stack nuevo
     - Ejecutar escaneo de dependencias y verificar que no hay vulnerabilidades críticas o altas
-    - Verificar que todas las dependencias son versiones actuales y soportadas: Nuxt 3.x, Vue 3.x, TypeScript 5.x, Node 20 LTS, Vite 5.x+
+    - Verificar que todas las dependencias son versiones actuales y soportadas: Nuxt 4.x, Vue 3.x, TypeScript 5.x, Node 20 LTS, Vite 6.x
     - Verificar que no se requiere archivo `.snyk` con vulnerabilidades ignoradas
     - _Requerimientos: 18.1, 18.2, 18.3, 18.4_
 

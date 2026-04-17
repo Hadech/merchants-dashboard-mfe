@@ -4,22 +4,23 @@
 
 El Merchants Dashboard de Wompi es un monolito SPA con **Nuxt 1.0.0** (Vue 2.7), Webpack 3, Node 12, sin TypeScript. Acumula **60+ vulnerabilidades ignoradas** en Snyk. El framework está en EOL, las dependencias no se pueden actualizar, y la arquitectura monolítica impide escalar por equipos.
 
-## La Propuesta: Nuxt 3 + Module Federation (NO Next.js)
+## La Propuesta: Nuxt 4 + Module Federation (NO Next.js)
 
-### Por qué Nuxt 3 y no Next.js
+### Por qué Nuxt 4 y no Next.js
 
-| Factor | Next.js (React) | Nuxt 3 (Vue 3) | Ganador |
+| Factor | Next.js (React) | Nuxt 4 (Vue 3) | Ganador |
 |--------|----------------|-----------------|---------|
-| Curva de aprendizaje del equipo | Alta — reescribir TODO de Vue a React | Baja — migrar templates Vue 2→3, misma mentalidad | **Nuxt 3** |
-| Velocidad de migración | Reescribir cada componente desde cero | Adaptar componentes existentes (80% reutilizable) | **Nuxt 3** |
-| Module Federation | `@module-federation/nextjs-mf` (quirks con App Router, SSR issues) | `@module-federation/vite` (estable, Vite nativo) | **Nuxt 3** |
-| Migración de estado | Vuex → Zustand/Redux (reescritura total) | Vuex → Pinia (migración casi 1:1, API similar) | **Nuxt 3** |
-| Migración de i18n | vue-i18n → next-intl (API completamente diferente) | vue-i18n 9 → @nuxtjs/i18n (misma API, versión nueva) | **Nuxt 3** |
-| Migración de auth | Cognito manual → React context (reescribir) | Cognito manual → composable (adaptar) | **Nuxt 3** |
-| Riesgo en 48h | Muy alto — framework nuevo + paradigma nuevo | Medio — mismo ecosistema, versión moderna | **Nuxt 3** |
+| Curva de aprendizaje del equipo | Alta — reescribir TODO de Vue a React | Baja — migrar templates Vue 2→3, misma mentalidad | **Nuxt 4** |
+| Velocidad de migración | Reescribir cada componente desde cero | Adaptar componentes existentes (80% reutilizable) | **Nuxt 4** |
+| Module Federation | `@module-federation/nextjs-mf` (quirks con App Router, SSR issues) | `@module-federation/vite` (estable, Vite nativo) | **Nuxt 4** |
+| Migración de estado | Vuex → Zustand/Redux (reescritura total) | Vuex → Pinia (migración casi 1:1, API similar) | **Nuxt 4** |
+| Migración de i18n | vue-i18n → next-intl (API completamente diferente) | vue-i18n 9 → @nuxtjs/i18n (misma API, versión nueva) | **Nuxt 4** |
+| Migración de auth | Cognito manual → React context (reescribir) | Cognito manual → composable (adaptar) | **Nuxt 4** |
+| Riesgo en 48h | Muy alto — framework nuevo + paradigma nuevo | Medio — mismo ecosistema, versión moderna | **Nuxt 4** |
+| Estructura de proyecto | Convencional | Nueva estructura `app/` con separación app/server/shared | **Nuxt 4** |
 | Ecosistema MFE | Más maduro pero más complejo | Suficiente para el MVP | Empate |
 
-**Conclusión:** Con 4 personas (1 QA) y 48 horas, cambiar de Vue a React es suicidio técnico. Nuxt 3 te da el mismo resultado (0 CVEs, MFE, TypeScript, stack moderno) en la mitad del tiempo porque reutilizas el conocimiento del equipo y adaptas código existente en vez de reescribirlo.
+**Conclusión:** Con 4 personas (1 QA) y 48 horas, cambiar de Vue a React es suicidio técnico. Nuxt 4 te da el mismo resultado (0 CVEs, MFE, TypeScript, stack moderno) en la mitad del tiempo porque reutilizas el conocimiento del equipo y adaptas código existente en vez de reescribirlo. Además, Nuxt 4 trae mejor TypeScript, data fetching mejorado y route groups nativos.
 
 ## Arquitectura
 
@@ -45,8 +46,8 @@ merchants-dashboard-mfe/
 
 ### Module Federation con Vite
 
-- **Shell (Host):** Nuxt 3 app que expone shared packages y consume MFEs como remotes
-- **Cada MFE (Remote):** Nuxt 3 app independiente, deployable por separado
+- **Shell (Host):** Nuxt 4 app que expone shared packages y consume MFEs como remotes
+- **Cada MFE (Remote):** Nuxt 4 app independiente, deployable por separado
 - **Plugin:** `@module-federation/vite` — integración nativa con Vite (bundler de Nuxt 3)
 - **Shared:** Vue 3, Pinia, ofetch, Nuxt UI — singleton para evitar duplicación
 - **Comunicación:** Event bus tipado para cross-MFE events (merchant seleccionado, auth state)
@@ -55,13 +56,13 @@ merchants-dashboard-mfe/
 
 | Capa | Legacy | Nuevo | Migración |
 |------|--------|-------|-----------|
-| Framework | Nuxt 1 (Vue 2) | Nuxt 3 (Vue 3) | Adaptar Composition API |
+| Framework | Nuxt 1 (Vue 2) | Nuxt 4 (Vue 3) | Adaptar Composition API + estructura app/ |
 | Lenguaje | JavaScript | TypeScript strict | Agregar tipos progresivamente |
 | Estado | Vuex + vuex-saga | Pinia | Migración casi 1:1 |
 | UI | Element UI 2 | Nuxt UI (basado en Radix Vue + Tailwind) | Reemplazar componentes |
-| HTTP | axios 0.30 | ofetch (nativo Nuxt 3) o axios 1.x | Adaptar interceptors |
+| HTTP | axios 0.30 | ofetch (nativo Nuxt 4) o axios 1.x | Adaptar interceptors |
 | Auth | Cognito + localStorage | Cognito + composable tipado | Misma lógica, tipada |
-| Build | Webpack 3 | Vite + Module Federation | Configuración nueva |
+| Build | Webpack 3 | Vite 6 + Module Federation | Configuración nueva |
 | Tests | Jest 23 (sin tests) | Vitest + Playwright | Desde cero |
 | CSS | SASS + Element theme | Tailwind CSS + Nuxt UI | Reescribir estilos |
 | i18n | vue-i18n 8 | @nuxtjs/i18n (vue-i18n 9) | Adaptar traducciones |
@@ -200,7 +201,7 @@ export function useAuth() {
 | Module Federation + Vite tiene issues | Fallback: MFEs como packages internos del monorepo (sin runtime federation, pero misma arquitectura) |
 | No alcanza migrar 3 MFEs | Priorizar Shell + Transactions. Payouts segundo. Settings tercero. |
 | Nuxt UI no tiene equivalente de algún componente Element UI | Construir componente básico con Tailwind. No buscar pixel-perfect. |
-| Auth Cognito falla en Nuxt 3 | La librería es framework-agnostic. Si falla SSR, usar client-only. |
+| Auth Cognito falla en Nuxt 4 | La librería es framework-agnostic. Si falla SSR, usar client-only (ssr: false). |
 
 ## Variables de Entorno (MVP)
 
